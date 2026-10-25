@@ -1,0 +1,32 @@
+#!/bin/sh
+logger "==== custom firstboot uci defaults ===="
+
+# 修改防火墙
+# 设置全局默认转发为 ACCEPT
+uci set firewall.@defaults[0].input='ACCEPT'
+uci set firewall.@defaults[0].forward='ACCEPT'
+# lan区域设置
+uci set firewall.@zone[0].forward='ACCEPT'
+# wan区域设置
+uci set firewall.@zone[1].input='ACCEPT'
+uci set firewall.@zone[1].forward='ACCEPT'
+uci commit firewall
+service firewall reload
+
+# 修改主题和语言
+uci set luci.main.lang='zh_cn'
+uci set luci.main.mediaurlbase='/luci-static/argon'
+uci commit luci
+/etc/init.d/uhttpd restart
+
+# 修改ssh dropbear
+uci del dropbear.main.Interface
+uci commit dropbear
+service dropbear restart
+
+# 修改ttyd
+uci del ttyd.cfg01a8ea.interface
+uci commit ttyd
+service ttyd restart
+
+exit 0
